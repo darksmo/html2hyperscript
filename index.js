@@ -92,6 +92,9 @@ function convert(inputMarkup) {
             var dataAttribs = Object.keys(attribs).filter(function (sAttrib) { return sAttrib.indexOf("data-") === 0; })
             dataAttribs.forEach(function (sDataAttrib) {
                 var sDataAttribName = sDataAttrib.replace("data-", "");
+                sDataAttribName = sDataAttribName.split("-").map(function (name, i) {
+                    return i ? name : name.charAt(0).toUpperCase() + name.slice(1);
+                }).join("");
                 dataset[sDataAttribName] = attribs[sDataAttrib];
             });
             dataAttribs.forEach(function (sDataAttrib) { delete attribs[sDataAttrib]; });
