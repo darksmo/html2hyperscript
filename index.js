@@ -88,17 +88,38 @@ function convert(inputMarkup) {
             var classSuffix = (classNames !== undefined ? classNames : '').split(/\s+/g).filter(function (v) { return v.length > 0; }).map(function (cls) { return '.' + cls; }).join('');
             delete attribs['class'];
 
+            var dataset = {};
+            var dataAttribs = Object.keys(attribs).filter(function (sAttrib) { return sAttrib.indexOf("data-") === 0; })
+            dataAttribs.forEach(function (sDataAttrib) {
+                var sDataAttribName = sDataAttrib.replace("data-", "");
+                dataset[sDataAttribName] = attribs[sDataAttrib];
+            });
+            dataAttribs.forEach(function (sDataAttrib) { delete attribs[sDataAttrib]; });
+
             var attrPairs = Object.keys(attribs).map(function (k) { return JSON.stringify(k) + ': ' + JSON.stringify(attribs[k]) });
 
-            var item = 'h(' + JSON.stringify(element[0] + idSuffix + classSuffix) + (
-                attrPairs.length
-                    ? ", {\n" + indent + '    ' + attrPairs.join(",\n" + indent + '    ') + "\n" + indent + "}"
-                    : ''
-            ) + (
-                elementContent.length
-                    ? ', [' + (elementContent[0] === "\n" ? '' : ' ') + elementContent + (elementContent.match(/\s$/) ? '' : ' ') + ']'
-                    : ''
-            ) + ')';
+            var item = 
+                'h(' + JSON.stringify(element[0] + idSuffix + classSuffix) + (
+                    (attrPairs.length || Object.keys(dataset).length)
+                        ? ", {\n" + 
+                            ( 
+                                attrPairs.length 
+                                    ? indent + "    " + attrPairs.join(",\n" + indent + '    ') + "\n" + indent
+                                    : ""
+                            ) + 
+                            (
+                                Object.keys(dataset).length
+                                    ? (attrPairs.length ? "," : "") + '"dataset": ' + JSON.stringify(dataset)
+                                    : ""
+                            ) + 
+                            "\n}"
+                        : ""
+                ) + (
+                    elementContent.length
+                        ? ', [' + (elementContent[0] === "\n" ? '' : ' ') + elementContent + (elementContent.match(/\s$/) ? '' : ' ') + ']'
+                        : ''
+                ) + ')';
+            console.log("ITEM   " + item);
 
             currentItemList.add(item);
         },
